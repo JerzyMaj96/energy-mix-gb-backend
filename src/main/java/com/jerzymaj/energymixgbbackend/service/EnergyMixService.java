@@ -33,4 +33,8 @@ public class EnergyMixService {
 
         return null;
     }
+
+    public List<DailyEnergySummary> calculateThreeDaysSummary() {
+        return null;
+    }
 }
