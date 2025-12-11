@@ -24,6 +24,6 @@ public class CustomResponseEntityExceptionHandler extends ResponseEntityExceptio
         ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), ex.getMessage(),
                 request.getDescription(false));
 
-        return new ResponseEntity<>(errorDetails, HttpStatus.); // todo finish
+        return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND); // todo finish
     }
 }
