@@ -69,6 +69,9 @@ public class EnergyMixService {
             }
         }
 
+        // obliczam średnie wartości wszystkich procentowych udziałów energii poprzez podzielenie
+        // ich sum przez ilość pobranych interwałów.
+
         int intervalNum = intervalsList.size();
 
         double averageCleanEnergyPercent = cleanEnergyPercentSum / intervalNum;
@@ -113,25 +116,29 @@ public class EnergyMixService {
 
     public List<DailyEnergySummary> calculateThreeDaysSummary() {
 
-        String today = LocalDate.now().toString() + "T00:00Z";
-        String inThreeDays = LocalDate.now().plusDays(3).toString() + "T00:00Z";
+        String today = LocalDate.now().toString();
+        String inThreeDays = LocalDate.now().plusDays(3).toString();
 
+        // pobieram interwały na trzy dni
         EnergyResponse energyResponse = getEnergyData(today, inThreeDays);
 
         Map<String, List<EnergyMixInterval>> groupedByDayIntervals = new HashMap<>();
 
-        for (EnergyMixInterval interval : energyResponse.data()) {
-            String dateKey = interval.from().substring(0,10);
 
-            if(!groupedByDayIntervals.containsKey(dateKey)) {
+        // grupowanie interwałów po dacie i zapisanie ich w mapie
+        for (EnergyMixInterval interval : energyResponse.data()) {
+            String dateKey = interval.from().substring(0, 10);
+
+            if (!groupedByDayIntervals.containsKey(dateKey)) {
                 groupedByDayIntervals.put(dateKey, new ArrayList<>());
             }
 
             groupedByDayIntervals.get(dateKey).add(interval);
         }
 
-        List<DailyEnergySummary>  dailyEnergySummaryList = new ArrayList<>();
+        List<DailyEnergySummary> dailyEnergySummaryList = new ArrayList<>();
 
+        // wyliczam średnie w każdym dniu  i mapuję wyniki do listy
         for (String dateKey : groupedByDayIntervals.keySet()) {
             List<EnergyMixInterval> intervalList = groupedByDayIntervals.get(dateKey);
 
@@ -146,11 +153,64 @@ public class EnergyMixService {
     }
 
     /**
+     * Finds the best time window for charging electric vehicle.
+     * It analyzes forecasts for tomorrow and the day after tomorrow.
      *
+     * @param windowLength duration of charging in hours
+     * @return {@link OptimalChargingWindow} with the highest average clean energy.
      */
 
     public OptimalChargingWindow calculateOptimalChargingWindow(int windowLength) {
 
-        return null;
+        // dwie zmienne tomorrow i dayAfteTomorrow
+        String tomorrowStart = LocalDate.now().plusDays(1).toString();
+        String dayAfterTomorrowEnd = LocalDate.now().plusDays(3).toString();
+
+        EnergyResponse energyResponse = getEnergyData(tomorrowStart, dayAfterTomorrowEnd);
+        List<EnergyMixInterval> allIntervals = energyResponse.data();
+
+        int windowSize = windowLength * 2;
+
+
+        double maxAverage = Double.NEGATIVE_INFINITY;
+        EnergyMixInterval bestStartInterval = null;
+
+
+        //1. przechodzimy po każdym elemencie z listy EnergyMixInterval
+        for (int i = 0; i <= allIntervals.size() - windowSize; i++) {
+
+            //2. pobieramy interwały od początku w przedziale czasowym pierwszy interwał do windowLength * 2
+            List<EnergyMixInterval> currWindow = allIntervals.subList(i, i + windowSize);
+
+
+            //3. sumujemy czystą energię w interwałach i dzielimy średnią
+            // przez podzielenie na ilość interwałów w oknie
+            double sum = 0;
+
+            for (EnergyMixInterval interval : currWindow) {
+                sum += calculateCleanEnergyPercent(interval);
+            }
+
+            double currentAverage = sum / currWindow.size();
+
+            //4. sprawdzam czy energia w sprawdzanym oknie jest czystsza niż poprzednie
+            // zapisuje nowe wyniki do zmiennych jeśli warunek jest spełniony
+            if (currentAverage > maxAverage) {
+                maxAverage = currentAverage;
+                bestStartInterval = allIntervals.get(i);
+            }
+        }
+
+        //5. zabezpieczamy przed pustością listy
+        if (bestStartInterval == null) {
+            throw new NoEnergyMixIntervalException("No intervals found for given date");
+        }
+
+        //6. obliczam datę końcową
+        int startIndex = allIntervals.indexOf(bestStartInterval);
+        int endIndex = startIndex + windowSize - 1;
+        EnergyMixInterval bestEndInterval = allIntervals.get(endIndex);
+
+        return new OptimalChargingWindow(bestStartInterval.from(), bestEndInterval.to(), maxAverage);
     }
 }

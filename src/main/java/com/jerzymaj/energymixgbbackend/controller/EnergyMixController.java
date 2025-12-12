@@ -29,5 +29,4 @@ public class EnergyMixController {
 
         return ResponseEntity.ok(energyMixService.calculateOptimalChargingWindow(windowLength));
     }
-
 }
