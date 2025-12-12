@@ -1,10 +1,13 @@
 package com.jerzymaj.energymixgbbackend.controller;
 
 import com.jerzymaj.energymixgbbackend.DTOs.DailyEnergySummary;
+import com.jerzymaj.energymixgbbackend.DTOs.OptimalChargingWindow;
 import com.jerzymaj.energymixgbbackend.service.EnergyMixService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -17,7 +20,14 @@ public class EnergyMixController {
     private final EnergyMixService energyMixService;
 
     @GetMapping("/three-days-summary")
-    public List<DailyEnergySummary> calculateThreeDaysSummary() {
-        return energyMixService.calculateThreeDaysSummary();
+    public ResponseEntity<List<DailyEnergySummary>> calculateThreeDaysSummary() {
+        return ResponseEntity.ok(energyMixService.calculateThreeDaysSummary());
     }
+
+    @GetMapping("/optimal-charging-window")
+    public ResponseEntity<OptimalChargingWindow> calculateOptimalChargingWindow(@RequestParam int windowLength) {
+
+        return ResponseEntity.ok(energyMixService.calculateOptimalChargingWindow(windowLength));
+    }
+
 }
