@@ -1,9 +1,6 @@
 package com.jerzymaj.energymixgbbackend.unit;
 
-import com.jerzymaj.energymixgbbackend.DTOs.DailyEnergySummary;
-import com.jerzymaj.energymixgbbackend.DTOs.EnergyMixInterval;
-import com.jerzymaj.energymixgbbackend.DTOs.EnergyResponse;
-import com.jerzymaj.energymixgbbackend.DTOs.Fuel;
+import com.jerzymaj.energymixgbbackend.DTOs.*;
 import com.jerzymaj.energymixgbbackend.service.EnergyMixService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,7 +30,7 @@ public class EnergyMixServiceUnitTests {
     public void calculateThreeDaysSummary_ShouldReturnCorrectData() {
         EnergyMixInterval interval = new EnergyMixInterval(
                 "2025-12-14T12:00:00Z", "2025-12-14T12:30:00Z",
-                List.of(new Fuel("wind", 30.0), new Fuel("coal", 70.0))
+                List.of(new Fuel("hydro", 30.0), new Fuel("coal", 70.0))
         );
 
         EnergyResponse mockedResponse = new EnergyResponse(List.of(interval));
@@ -48,5 +45,32 @@ public class EnergyMixServiceUnitTests {
 
         assertEquals(1, actualResult.size());
         assertEquals(30.0, actualResult.getFirst().cleanEnergyPercent());
+    }
+
+    @Test
+    public void calculateOptimalChargingWindow() {
+        EnergyMixInterval intervalFirst = new EnergyMixInterval(
+                "2025-12-14T12:00:00Z", "2025-12-14T12:30:00Z",
+                List.of(new Fuel("hydro", 30.0), new Fuel("coal", 70.0))
+        );
+
+        EnergyMixInterval intervalSecond = new EnergyMixInterval(
+                "2025-12-14T12:30:00Z", "2025-12-14T13:00:00Z",
+                List.of(new Fuel("hydro", 40.0), new Fuel("coal", 60.0))
+        );
+
+        EnergyResponse mockedResponse = new EnergyResponse(List.of(intervalFirst, intervalSecond));
+
+        when(restClient.get()
+                .uri(anyString(), any(), any())
+                .retrieve()
+                .body(EnergyResponse.class))
+                .thenReturn(mockedResponse);
+
+        OptimalChargingWindow actualResult = energyMixService.calculateOptimalChargingWindow(1);
+
+        assertEquals(35.0, actualResult.averageCleanEnergyPercent());
+        assertEquals("2025-12-14T12:00:00Z", actualResult.startingDateTime());
+        assertEquals("2025-12-14T13:00:00Z", actualResult.endingDateTime());
     }
 }
