@@ -19,10 +19,8 @@ public class EnergyMixService {
 
     private static final List<String> CLEAN_ENERGY = List.of("biomass", "nuclear", "hydro", "wind", "solar");
 
-    public EnergyMixService(@Value("${api.carbon-intensity.url}") String baseUrl) {
-        this.restClient = RestClient.builder()
-                .baseUrl(baseUrl)
-                .build();
+    public EnergyMixService(RestClient restClient) {
+        this.restClient = restClient;
     }
 
     /**
