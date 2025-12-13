@@ -117,7 +117,7 @@ public class EnergyMixService {
     public List<DailyEnergySummary> calculateThreeDaysSummary() {
 
         String today = LocalDate.now().toString();
-        String inThreeDays = LocalDate.now().plusDays(3).toString();
+        String inThreeDays = LocalDate.now().plusDays(2).toString();
 
         // pobieram interwały na trzy dni
         EnergyResponse energyResponse = getEnergyData(today, inThreeDays);
