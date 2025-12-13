@@ -59,7 +59,12 @@ public class EnergyMixServiceUnitTests {
                 List.of(new Fuel("hydro", 40.0), new Fuel("coal", 60.0))
         );
 
-        EnergyResponse mockedResponse = new EnergyResponse(List.of(intervalFirst, intervalSecond));
+        EnergyMixInterval intervalThird = new EnergyMixInterval(
+                "2025-12-14T13:00:00Z", "2025-12-14T13:30:00Z",
+                List.of(new Fuel("solar", 70.0), new Fuel("coal", 30.0))
+        );
+
+        EnergyResponse mockedResponse = new EnergyResponse(List.of(intervalFirst, intervalSecond, intervalThird));
 
         when(restClient.get()
                 .uri(anyString(), any(), any())
@@ -69,8 +74,8 @@ public class EnergyMixServiceUnitTests {
 
         OptimalChargingWindow actualResult = energyMixService.calculateOptimalChargingWindow(1);
 
-        assertEquals(35.0, actualResult.averageCleanEnergyPercent());
-        assertEquals("2025-12-14T12:00:00Z", actualResult.startingDateTime());
-        assertEquals("2025-12-14T13:00:00Z", actualResult.endingDateTime());
+        assertEquals(55.0, actualResult.averageCleanEnergyPercent());
+        assertEquals("2025-12-14T12:30:00Z", actualResult.startingDateTime());
+        assertEquals("2025-12-14T13:30:00Z", actualResult.endingDateTime());
     }
 }
