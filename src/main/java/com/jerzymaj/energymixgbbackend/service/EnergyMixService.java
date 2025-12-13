@@ -185,7 +185,7 @@ public class EnergyMixService {
 
             //3. sumujemy czystą energię w interwałach i dzielimy średnią
             // przez podzielenie na ilość interwałów w oknie
-            double sum = 0;
+            double sum = 0; // todo sprawdzić czy nie można wydzielić jakiejś logiki
 
             for (EnergyMixInterval interval : currWindow) {
                 sum += calculateCleanEnergyPercent(interval);
