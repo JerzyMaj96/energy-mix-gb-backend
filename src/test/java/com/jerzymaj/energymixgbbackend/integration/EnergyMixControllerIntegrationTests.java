@@ -64,8 +64,5 @@ public class EnergyMixControllerIntegrationTests {
                 .andExpect(jsonPath("$.startingDateTime").value("2025-12-14T12:00:00Z"))
                 .andExpect(jsonPath("$.endingDateTime").value("2025-12-14T14:00:00Z"))
                 .andExpect(jsonPath("$.averageCleanEnergyPercent").value(85.5));
-
-
     }
-
 }

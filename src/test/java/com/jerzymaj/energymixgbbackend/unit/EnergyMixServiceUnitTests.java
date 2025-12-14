@@ -1,6 +1,7 @@
 package com.jerzymaj.energymixgbbackend.unit;
 
 import com.jerzymaj.energymixgbbackend.DTOs.*;
+import com.jerzymaj.energymixgbbackend.exceptions.NoEnergyMixIntervalException;
 import com.jerzymaj.energymixgbbackend.service.EnergyMixService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,6 +15,7 @@ import org.springframework.web.client.RestClient;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -82,5 +84,21 @@ public class EnergyMixServiceUnitTests {
         assertEquals(55.0, actualResult.averageCleanEnergyPercent());
         assertEquals("2025-12-14T12:30:00Z", actualResult.startingDateTime());
         assertEquals("2025-12-14T13:30:00Z", actualResult.endingDateTime());
+    }
+
+    @Test
+    public void calculateThreeDaysSummary_ShouldThrowException() {
+
+        EnergyResponse emptyResponse = new EnergyResponse(List.of());
+
+        when(restClient.get()
+                .uri(anyString(), any(), any())
+                .retrieve()
+                .body(EnergyResponse.class))
+                .thenReturn(emptyResponse);
+
+        assertThrows(NoEnergyMixIntervalException.class, () -> {
+            energyMixService.calculateThreeDaysSummary();
+        });
     }
 }

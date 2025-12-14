@@ -120,6 +120,10 @@ public class EnergyMixService {
         // pobieram interwały na trzy dni
         EnergyResponse energyResponse = getEnergyData(today, inThreeDays);
 
+        if (energyResponse.data() == null || energyResponse.data().isEmpty()) {
+            throw new NoEnergyMixIntervalException("Returned list is empty");
+        }
+
         Map<String, List<EnergyMixInterval>> groupedByDayIntervals = new HashMap<>();
 
 
@@ -165,6 +169,11 @@ public class EnergyMixService {
         String dayAfterTomorrowEnd = LocalDate.now().plusDays(3).toString();
 
         EnergyResponse energyResponse = getEnergyData(tomorrowStart, dayAfterTomorrowEnd);
+
+        if (energyResponse.data() == null || energyResponse.data().isEmpty()) {
+            throw new NoEnergyMixIntervalException("No intervals returned from API");
+        }
+
         List<EnergyMixInterval> allIntervals = energyResponse.data();
 
         int windowSize = windowLength * 2;
