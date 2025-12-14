@@ -182,7 +182,6 @@ public class EnergyMixService {
         double maxAverage = Double.NEGATIVE_INFINITY;
         EnergyMixInterval bestStartInterval = null;
 
-
         //1. przechodzimy po każdym elemencie z listy EnergyMixInterval
         for (int i = 0; i <= allIntervals.size() - windowSize; i++) {
 

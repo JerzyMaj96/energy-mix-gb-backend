@@ -101,4 +101,20 @@ public class EnergyMixServiceUnitTests {
             energyMixService.calculateThreeDaysSummary();
         });
     }
+
+    @Test
+    public void calculateOptimalChargingWindow_ShouldThrowException() {
+
+        EnergyResponse emptyResponse = new EnergyResponse(List.of());
+
+        when(restClient.get()
+                .uri(anyString(), any(), any())
+                .retrieve()
+                .body(EnergyResponse.class))
+                .thenReturn(emptyResponse);
+
+        assertThrows(NoEnergyMixIntervalException.class, () -> {
+            energyMixService.calculateOptimalChargingWindow(2);
+        });
+    }
 }
