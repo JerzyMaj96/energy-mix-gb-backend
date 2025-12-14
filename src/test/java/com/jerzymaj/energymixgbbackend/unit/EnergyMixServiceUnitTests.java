@@ -2,6 +2,7 @@ package com.jerzymaj.energymixgbbackend.unit;
 
 import com.jerzymaj.energymixgbbackend.DTOs.*;
 import com.jerzymaj.energymixgbbackend.service.EnergyMixService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
@@ -26,14 +27,32 @@ public class EnergyMixServiceUnitTests {
     @InjectMocks
     private EnergyMixService energyMixService;
 
-    @Test
-    public void calculateThreeDaysSummary_ShouldReturnCorrectData() {
-        EnergyMixInterval interval = new EnergyMixInterval(
+    private EnergyMixInterval intervalFirst;
+    private EnergyMixInterval intervalSecond;
+    private EnergyMixInterval intervalThird;
+
+    @BeforeEach
+    public void setUp() {
+        intervalFirst = new EnergyMixInterval(
                 "2025-12-14T12:00:00Z", "2025-12-14T12:30:00Z",
                 List.of(new Fuel("hydro", 30.0), new Fuel("coal", 70.0))
         );
 
-        EnergyResponse mockedResponse = new EnergyResponse(List.of(interval));
+        intervalSecond = new EnergyMixInterval(
+                "2025-12-14T12:30:00Z", "2025-12-14T13:00:00Z",
+                List.of(new Fuel("hydro", 40.0), new Fuel("coal", 60.0))
+        );
+
+        intervalThird = new EnergyMixInterval(
+                "2025-12-14T13:00:00Z", "2025-12-14T13:30:00Z",
+                List.of(new Fuel("solar", 70.0), new Fuel("coal", 30.0))
+        );
+    }
+
+    @Test
+    public void calculateThreeDaysSummary_ShouldReturnCorrectData() {
+
+        EnergyResponse mockedResponse = new EnergyResponse(List.of(intervalFirst));
 
         when(restClient.get()
                 .uri(anyString(), any(), any())
@@ -49,20 +68,6 @@ public class EnergyMixServiceUnitTests {
 
     @Test
     public void calculateOptimalChargingWindow() {
-        EnergyMixInterval intervalFirst = new EnergyMixInterval(
-                "2025-12-14T12:00:00Z", "2025-12-14T12:30:00Z",
-                List.of(new Fuel("hydro", 30.0), new Fuel("coal", 70.0))
-        );
-
-        EnergyMixInterval intervalSecond = new EnergyMixInterval(
-                "2025-12-14T12:30:00Z", "2025-12-14T13:00:00Z",
-                List.of(new Fuel("hydro", 40.0), new Fuel("coal", 60.0))
-        );
-
-        EnergyMixInterval intervalThird = new EnergyMixInterval(
-                "2025-12-14T13:00:00Z", "2025-12-14T13:30:00Z",
-                List.of(new Fuel("solar", 70.0), new Fuel("coal", 30.0))
-        );
 
         EnergyResponse mockedResponse = new EnergyResponse(List.of(intervalFirst, intervalSecond, intervalThird));
 
