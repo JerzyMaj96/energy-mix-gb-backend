@@ -88,15 +88,10 @@ public class EnergyMixService {
 
     private double calculateCleanEnergyPercent(EnergyMixInterval interval) {
 
-        double percentSum = 0;
-
-        for (Fuel fuel : interval.generationMix()) {
-            if (CLEAN_ENERGY.contains(fuel.fuel())) {
-                percentSum += fuel.percentage();
-            }
-        }
-
-        return percentSum;
+        return interval.generationMix().stream()
+                .filter(fuel -> CLEAN_ENERGY.contains(fuel.fuel()))
+                .mapToDouble(Fuel::percentage)
+                .sum();
     }
 
     /**
@@ -196,13 +191,18 @@ public class EnergyMixService {
         return new OptimalChargingWindow(bestStartInterval.from(), bestEndInterval.to(), maxAverage);
     }
 
+    /**
+     * Helper method that calculates the average percentage of clean energy in a given window
+     *
+     * @param window list of intervals
+     * @return average clean energy percentage for the window
+     */
+
     private double calculateWindowAverage(List<EnergyMixInterval> window) {
-        double sum = 0;
 
-        for (EnergyMixInterval interval : window) {
-            sum += calculateCleanEnergyPercent(interval);
-        }
-
-        return sum / window.size();
+        return window.stream()
+                .mapToDouble(this::calculateCleanEnergyPercent)
+                .average()
+                .orElse(0.0);
     }
 }
