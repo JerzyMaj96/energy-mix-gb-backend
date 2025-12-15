@@ -2,11 +2,11 @@ package com.jerzymaj.energymixgbbackend.service;
 
 import com.jerzymaj.energymixgbbackend.DTOs.*;
 import com.jerzymaj.energymixgbbackend.exceptions.NoEnergyMixIntervalException;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -104,10 +104,15 @@ public class EnergyMixService {
 
     public List<DailyEnergySummary> calculateThreeDaysSummary() {
 
-        String today = LocalDate.now().toString();
-        String inThreeDays = LocalDate.now().plusDays(2).toString();
+        LocalDate now = LocalDate.now(ZoneId.of("Europe/London"));
 
-        EnergyResponse energyResponse = getEnergyData(today, inThreeDays);
+        List<String> targetDates = List.of(
+                now.toString(),
+                now.plusDays(1).toString(),
+                now.plusDays(2).toString()
+        );
+
+        EnergyResponse energyResponse = getEnergyData(now.toString(), now.plusDays(4).toString());
 
         if (energyResponse.data() == null || energyResponse.data().isEmpty()) {
             throw new NoEnergyMixIntervalException("Returned list is empty");
@@ -119,25 +124,27 @@ public class EnergyMixService {
         for (EnergyMixInterval interval : energyResponse.data()) {
             String dateKey = interval.from().substring(0, 10);
 
-            if (!groupedByDayIntervals.containsKey(dateKey)) {
-                groupedByDayIntervals.put(dateKey, new ArrayList<>());
-            }
+            if (targetDates.contains(dateKey)) {
+                if (!groupedByDayIntervals.containsKey(dateKey)) {
+                    groupedByDayIntervals.put(dateKey, new ArrayList<>());
+                }
 
-            groupedByDayIntervals.get(dateKey).add(interval);
+                groupedByDayIntervals.get(dateKey).add(interval);
+            }
         }
 
         List<DailyEnergySummary> dailyEnergySummaryList = new ArrayList<>();
 
 
-        for (String dateKey : groupedByDayIntervals.keySet()) {
-            List<EnergyMixInterval> intervalList = groupedByDayIntervals.get(dateKey);
+        for (String targetDate : targetDates) {
+            if (groupedByDayIntervals.containsKey(targetDate)) {
+                List<EnergyMixInterval> intervalList = groupedByDayIntervals.get(targetDate);
 
-            DailyEnergySummary dailyEnergySummary = calculateDailyEnergySummary(intervalList, dateKey);
+                DailyEnergySummary dailyEnergySummary = calculateDailyEnergySummary(intervalList, targetDate);
 
-            dailyEnergySummaryList.add(dailyEnergySummary);
+                dailyEnergySummaryList.add(dailyEnergySummary);
+            }
         }
-
-        dailyEnergySummaryList.sort((summary1, summary2) -> summary1.date().compareTo(summary2.date()));
 
         return dailyEnergySummaryList;
     }
@@ -151,9 +158,10 @@ public class EnergyMixService {
      */
 
     public OptimalChargingWindow calculateOptimalChargingWindow(int windowLength) {
+        LocalDate now = LocalDate.now(ZoneId.of("Europe/London"));
 
-        String tomorrowStart = LocalDate.now().plusDays(1).toString();
-        String dayAfterTomorrowEnd = LocalDate.now().plusDays(3).toString();
+        String tomorrowStart = now.plusDays(1).toString();
+        String dayAfterTomorrowEnd = now.plusDays(3).toString();
 
         EnergyResponse energyResponse = getEnergyData(tomorrowStart, dayAfterTomorrowEnd);
 
