@@ -41,7 +41,7 @@ public class EnergyMixService {
 
     /**
      * Aggregates a list of 30-minute intervals into a single daily summary.
-     * Calculates the average renewable energy percentage and the average mix for each fuel type.
+     * Calculates the average clean energy percentage and the average mix for each fuel type.
      *
      * @param intervalsList list of intervals for a single day.
      * @param date          date string representing the day.
@@ -79,7 +79,7 @@ public class EnergyMixService {
     }
 
     /**
-     * Helper method that calculates the total percentage of renewable energy
+     * Helper method that calculates the total percentage of clean energy
      * for a single interval.
      *
      * @param interval single energy mix interval.
@@ -95,7 +95,7 @@ public class EnergyMixService {
     }
 
     /**
-     * Fetches energy data for today and the next 3 days.
+     * Fetches energy data for today and the next 2 days.
      * It groups the data manually by date and calculates the daily averages.
      * Finally, it sorts the result by date.
      *

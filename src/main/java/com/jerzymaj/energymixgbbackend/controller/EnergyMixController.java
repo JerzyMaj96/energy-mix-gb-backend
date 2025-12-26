@@ -20,12 +20,12 @@ public class EnergyMixController {
     private final EnergyMixService energyMixService;
 
     @GetMapping("/three-days-summary")
-    public ResponseEntity<List<DailyEnergySummary>> calculateThreeDaysSummary() {
+    public ResponseEntity<List<DailyEnergySummary>> retrieveThreeDaysSummary() {
         return ResponseEntity.ok(energyMixService.calculateThreeDaysSummary());
     }
 
     @GetMapping("/optimal-charging-window")
-    public ResponseEntity<OptimalChargingWindow> calculateOptimalChargingWindow(@RequestParam int windowLength) {
+    public ResponseEntity<OptimalChargingWindow> retrieveOptimalChargingWindow(@RequestParam int windowLength) {
 
         return ResponseEntity.ok(energyMixService.calculateOptimalChargingWindow(windowLength));
     }
