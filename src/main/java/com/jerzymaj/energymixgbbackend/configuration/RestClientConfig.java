@@ -9,7 +9,7 @@ import org.springframework.web.client.RestClient;
 public class RestClientConfig {
 
     @Bean
-    public RestClient restTemplate(@Value("${api.carbon-intensity.url}") String baseUrl) {
+    public RestClient restClient(@Value("${api.carbon-intensity.url}") String baseUrl) {
         return RestClient.builder()
                 .baseUrl(baseUrl)
                 .build();
