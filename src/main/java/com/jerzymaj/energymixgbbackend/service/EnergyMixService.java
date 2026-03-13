@@ -2,6 +2,7 @@ package com.jerzymaj.energymixgbbackend.service;
 
 import com.jerzymaj.energymixgbbackend.DTOs.*;
 import com.jerzymaj.energymixgbbackend.exceptions.NoEnergyMixIntervalException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -17,7 +18,8 @@ public class EnergyMixService {
 
     private final RestClient restClient;
 
-    private static final List<String> CLEAN_ENERGY = List.of("biomass", "nuclear", "hydro", "wind", "solar");
+    @Value("${energy.clean-types}")
+    private List<String> cleanEnergy;
 
     public EnergyMixService(RestClient restClient) {
         this.restClient = restClient;
@@ -89,7 +91,7 @@ public class EnergyMixService {
     private double calculateCleanEnergyPercent(EnergyMixInterval interval) {
 
         return interval.generationMix().stream()
-                .filter(fuel -> CLEAN_ENERGY.contains(fuel.fuel()))
+                .filter(fuel -> cleanEnergy.contains(fuel.fuel()))
                 .mapToDouble(Fuel::percentage)
                 .sum();
     }
